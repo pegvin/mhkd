@@ -30,7 +30,7 @@ clean:
 
 dist: clean
 	mkdir -p mhkd-$(VERSION)
-	cp LICENSE Makefile README config.def.h config.mk mhkd.1 $(SRC) mhkd-$(VERSION)
+	cp LICENSE Makefile README.md config.def.h config.mk mhkd.1 $(SRC) mhkd-$(VERSION)
 	tar -cf mhkd-$(VERSION).tar mhkd-$(VERSION)
 	gzip mhkd-$(VERSION).tar
 	rm -rf mhkd-$(VERSION)
