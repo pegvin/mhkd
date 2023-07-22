@@ -23,10 +23,10 @@ config.h:
 $(OBJ): config.h config.mk
 
 mhkd: mhkd.o
-	$(CC) -o $@ mhkd.o $(LDFLAGS)
+	$(CC) -o ./$@ mhkd.o $(LDFLAGS)
 
 clean:
-	rm -f mhkd $(OBJ) mhkd-$(VERSION).tar.gz
+	rm -f ./mhkd $(OBJ) mhkd-$(VERSION).tar.gz
 
 dist: clean
 	mkdir -p mhkd-$(VERSION)
@@ -37,7 +37,7 @@ dist: clean
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	cp -f mhkd $(DESTDIR)$(PREFIX)/bin
+	cp -f ./mhkd $(DESTDIR)$(PREFIX)/bin
 	chmod 755 $(DESTDIR)$(PREFIX)/bin/mhkd
 	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
 	sed "s/VERSION/$(VERSION)/g" < mhkd.1 > $(DESTDIR)$(MANPREFIX)/man1/mhkd.1
