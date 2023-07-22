@@ -11,8 +11,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
 
-
-Display *dpy;
+Display* dpy = NULL;
 Window root;
 int screen;
 unsigned int numlockmask = 0;
@@ -20,37 +19,29 @@ unsigned int mouse_now_button = 0, mouse_now_state = 0;
 uint32_t mouse_motion_counter = 0;
 int (*xerrorxlib)(Display *, XErrorEvent *);
 
-
-enum MouseInfo
-{
+enum MouseInfo {
     AppendMouseInfo,
     IgnoreMouseInfo,
 };
 
-struct MouseEvent
-{
+struct MouseEvent {
     int event_type;
     unsigned int modifier;
     unsigned int button;
     enum MouseInfo mouse_info;
-    char *command;
+    char* command;
 };
 
-struct KeyEvent
-{
+struct KeyEvent {
     int event_type;
     unsigned int modifier;
     KeySym keysym;
-    char *command;
+    char* command;
 };
-
 
 #include "config.h"
 
-
-int
-xerror(Display *dpy, XErrorEvent *ee)
-{
+int xerror(Display* dpy, XErrorEvent* ee) {
     if ((ee->request_code == X_GrabButton && ee->error_code == BadAccess) ||
         (ee->request_code == X_GrabKey && ee->error_code == BadAccess))
         return 0;
@@ -58,16 +49,12 @@ xerror(Display *dpy, XErrorEvent *ee)
     return xerrorxlib(dpy, ee);
 }
 
-void
-spawn(char *command)
-{
+void spawn(char* command) {
     if (debug_print_spawned_command)
         fprintf(stderr, "nhkd: spawn [%s]\n", command);
 
-    if (fork() == 0)
-    {
-        if (fork() == 0)
-        {
+    if (fork() == 0) {
+        if (fork() == 0) {
             close(ConnectionNumber(dpy));
             setsid();
 
@@ -95,11 +82,9 @@ spawn(char *command)
     }
 }
 
-void
-updatenumlockmask(void)
-{
+void updatenumlockmask(void) {
     size_t i, j, max_keypermod;
-    XModifierKeymap *modmap;
+    XModifierKeymap* modmap = NULL;
 
     modmap = XGetModifierMapping(dpy);
     if (modmap == NULL || modmap->max_keypermod < 0)
@@ -108,13 +93,9 @@ updatenumlockmask(void)
     max_keypermod = modmap->max_keypermod;
 
     numlockmask = 0;
-    for (i = 0; i < 8; i++)
-    {
-        for (j = 0; j < max_keypermod; j++)
-        {
-            if (modmap->modifiermap[i * max_keypermod + j] ==
-                XKeysymToKeycode(dpy, XK_Num_Lock))
-            {
+    for (i = 0; i < 8; i++) {
+        for (j = 0; j < max_keypermod; j++) {
+            if (modmap->modifiermap[i * max_keypermod + j] == XKeysymToKeycode(dpy, XK_Num_Lock)) {
                 numlockmask = (1 << i);
             }
         }
@@ -122,13 +103,10 @@ updatenumlockmask(void)
     XFreeModifiermap(modmap);
 }
 
-void
-grabkeys(void)
-{
+void grabkeys(void) {
     KeyCode code;
     size_t ia, im;
-    unsigned int mousemask = ButtonPressMask | ButtonReleaseMask |
-                             PointerMotionMask;
+    unsigned int mousemask = ButtonPressMask | ButtonReleaseMask | PointerMotionMask;
 
     XUngrabKey(dpy, AnyKey, AnyModifier, root);
 
@@ -140,49 +118,43 @@ grabkeys(void)
             0, LockMask, numlockmask, numlockmask | LockMask
         };
 
-        for (ia = 0; ia < sizeof mouse_events / sizeof (struct MouseEvent); ia++)
-        {
-            for (im = 0; im < sizeof modifiers / sizeof modifiers[0]; im++)
-            {
-                XGrabButton(dpy, mouse_events[ia].button,
-                            mouse_events[ia].modifier | modifiers[im], root,
-                            False, mousemask, GrabModeAsync, GrabModeAsync,
-                            None, None);
+        for (ia = 0; ia < sizeof mouse_events / sizeof(struct MouseEvent); ia++) {
+            for (im = 0; im < sizeof modifiers / sizeof modifiers[0]; im++) {
+                XGrabButton(
+                    dpy, mouse_events[ia].button,
+                    mouse_events[ia].modifier | modifiers[im], root,
+                    False, mousemask, GrabModeAsync, GrabModeAsync,
+                    None, None
+                );
             }
         }
 
-        for (ia = 0; ia < sizeof key_events / sizeof (struct KeyEvent); ia++)
-        {
-            if ((code = XKeysymToKeycode(dpy, key_events[ia].keysym)))
-            {
-                for (im = 0; im < sizeof modifiers / sizeof modifiers[0]; im++)
-                {
-                    XGrabKey(dpy, code, key_events[ia].modifier | modifiers[im],
-                             root, True, GrabModeAsync, GrabModeAsync);
+        for (ia = 0; ia < sizeof key_events / sizeof(struct KeyEvent); ia++) {
+            if ((code = XKeysymToKeycode(dpy, key_events[ia].keysym))) {
+                for (im = 0; im < sizeof modifiers / sizeof(modifiers[0]); im++) {
+                    XGrabKey(
+                        dpy, code, key_events[ia].modifier | modifiers[im],
+                        root, True, GrabModeAsync, GrabModeAsync
+                    );
                 }
             }
         }
     }
 }
 
-unsigned long
-cleanmask(unsigned long mask)
-{
-    return mask & ~(numlockmask | LockMask) &
-           (ShiftMask | ControlMask | Mod1Mask | Mod2Mask | Mod3Mask |
-            Mod4Mask | Mod5Mask);
+unsigned long cleanmask(unsigned long mask) {
+    return mask &
+           ~(numlockmask | LockMask) &
+           (ShiftMask | ControlMask | Mod1Mask | Mod2Mask | Mod3Mask | Mod4Mask | Mod5Mask);
 }
 
-void
-keyboard(XEvent *e)
-{
+void keyboard(XEvent* e) {
     size_t ia;
     KeySym keysym;
-    XKeyEvent *ev = &e->xkey;
+    XKeyEvent* ev = &e->xkey;
 
     keysym = XkbKeycodeToKeysym(dpy, ev->keycode, 0, 0);
-    for (ia = 0; ia < sizeof key_events / sizeof (struct KeyEvent); ia++)
-    {
+    for (ia = 0; ia < sizeof key_events / sizeof(struct KeyEvent); ia++) {
         if (key_events[ia].event_type == e->type &&
             key_events[ia].keysym == keysym &&
             cleanmask(key_events[ia].modifier) == cleanmask(ev->state))
@@ -192,9 +164,7 @@ keyboard(XEvent *e)
     }
 }
 
-void
-mouse_button(XEvent *e)
-{
+void mouse_button(XEvent* e) {
     size_t ia;
     XButtonEvent *ev = &e->xbutton;
     int x, y;
@@ -207,28 +177,27 @@ mouse_button(XEvent *e)
     x = ev->x_root;
     y = ev->y_root;
 
-    for (ia = 0; ia < sizeof mouse_events / sizeof (struct MouseEvent); ia++)
-    {
+    for (ia = 0; ia < sizeof mouse_events / sizeof(struct MouseEvent); ia++) {
         if (mouse_events[ia].event_type == e->type &&
             mouse_events[ia].button == mouse_now_button &&
             cleanmask(mouse_events[ia].modifier) == cleanmask(mouse_now_state))
         {
-            if (mouse_events[ia].mouse_info == AppendMouseInfo)
-            {
-                snprintf(cmd_buf, sizeof cmd_buf, "%s %d %d %lu",
-                         mouse_events[ia].command, x, y, ev->subwindow);
+            if (mouse_events[ia].mouse_info == AppendMouseInfo) {
+                snprintf(
+                    cmd_buf, sizeof cmd_buf, "%s %d %d %lu",
+                    mouse_events[ia].command, x, y, ev->subwindow
+                );
                 cmd_use = cmd_buf;
             }
             else
                 cmd_use = mouse_events[ia].command;
+
             spawn(cmd_use);
         }
     }
 }
 
-void
-mouse_motion(XEvent *e)
-{
+void mouse_motion(XEvent* e) {
     size_t ia;
     XMotionEvent *ev = &e->xmotion;
     int x, y;
@@ -238,29 +207,28 @@ mouse_motion(XEvent *e)
     y = ev->y_root;
     mouse_motion_counter++;
 
-    for (ia = 0; ia < sizeof mouse_events / sizeof (struct MouseEvent); ia++)
-    {
+    for (ia = 0; ia < sizeof mouse_events / sizeof (struct MouseEvent); ia++) {
         if (mouse_events[ia].event_type == e->type &&
             mouse_events[ia].button == mouse_now_button &&
             cleanmask(mouse_events[ia].modifier) == cleanmask(mouse_now_state))
         {
-            if (mouse_events[ia].mouse_info == AppendMouseInfo)
-            {
-                snprintf(cmd_buf, sizeof cmd_buf, "%s %d %d %lu %"PRIu32,
-                         mouse_events[ia].command,
-                         x, y, ev->subwindow, mouse_motion_counter);
+            if (mouse_events[ia].mouse_info == AppendMouseInfo) {
+                snprintf(
+                    cmd_buf, sizeof cmd_buf, "%s %d %d %lu %"PRIu32,
+                    mouse_events[ia].command, x, y, ev->subwindow,
+                    mouse_motion_counter
+                );
                 cmd_use = cmd_buf;
             }
             else
                 cmd_use = mouse_events[ia].command;
+
             spawn(cmd_use);
         }
     }
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     int di = 0, xkbmajor = XkbMajorVersion, xkbminor = XkbMinorVersion;
     XEvent ev;
 
@@ -270,8 +238,7 @@ main(int argc, char **argv)
     signal(SIGCHLD, SIG_IGN);
 
     dpy = XOpenDisplay(NULL);
-    if (!dpy)
-    {
+    if (!dpy) {
         fprintf(stderr, "nhkd: Cannot open display\n");
         exit(EXIT_FAILURE);
     }
@@ -280,20 +247,20 @@ main(int argc, char **argv)
     root = RootWindow(dpy, screen);
     xerrorxlib = XSetErrorHandler(xerror);
 
-    if (!XkbQueryExtension(dpy, &di, &di, &di, &xkbmajor, &xkbminor))
-    {
-        fprintf(stderr, "nhkd: XKB not available. Please report this! "
-                        "What does your setup look like?\n");
+    if (!XkbQueryExtension(dpy, &di, &di, &di, &xkbmajor, &xkbminor)) {
+        fprintf(
+            stderr,
+            "nhkd: XKB not available. Please report this! "
+            "What does your setup look like?\n"
+        );
         exit(EXIT_FAILURE);
     }
 
     grabkeys();
 
-    for (;;)
-    {
+    for (;;) {
         XNextEvent(dpy, &ev);
-        switch (ev.type)
-        {
+        switch (ev.type) {
             case ButtonPress:
             case ButtonRelease:
                 mouse_button(&ev);
@@ -310,4 +277,7 @@ main(int argc, char **argv)
                 break;
         }
     }
+
+    return 0;
 }
+
