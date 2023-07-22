@@ -13,7 +13,7 @@ INCS = `pkg-config --cflags x11`
 LIBS = `pkg-config --libs x11`
 
 # flags
-CFLAGS   = -std=c99 -pedantic -Wall -Os $(INCS) -DVERSION=\"$(VERSION)\"
+CFLAGS   = -std=c99 -pedantic -Wall -Wextra -Os $(INCS) -DVERSION=\"$(VERSION)\"
 LDFLAGS  = $(LIBS)
 
 # compiler and linker
