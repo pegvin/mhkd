@@ -1,5 +1,5 @@
 # mhkd - mini hotkey daemon
-originally written by [Peter Hofmann](https://www.uninformativ.de/contact.html), mhkd is a extended fork of [nhkd](https://www.uninformativ.de/git/nhkd/)
+originally written by [Peter Hofmann](https://www.uninformativ.de/contact.html), mhkd is a fork of [nhkd](https://www.uninformativ.de/git/nhkd/)
 
 ---
 ## Installation
@@ -26,6 +26,33 @@ while sleep 0.25; do nhkd; done &
 ```
 
 The loop ensures that you can easily restart the daemon by killing it.
+
+---
+## My Personal Config
+
+```bash
+# ~/.xinitrc
+
+mhkd &
+```
+
+```c
+// config.h
+
+#include <X11/XF86keysym.h>
+
+bool debug_print_spawned_command = false;
+
+struct MouseEvent mouse_events[] = {
+    { 0, 0, 0, 0, NULL }
+};
+
+struct KeyEvent key_events[] = {
+    { KeyPress, 0, XF86XK_AudioLowerVolume, "bash ~/.local/bin/volume down" },
+    { KeyPress, 0, XF86XK_AudioMute, "bash ~/.local/bin/volume toggle" },
+    { KeyPress, 0, XF86XK_AudioRaiseVolume, "bash ~/.local/bin/volume up" },
+};
+```
 
 ---
 # Thanks
