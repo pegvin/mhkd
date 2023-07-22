@@ -31,7 +31,7 @@ jobs:
       uses: vmactions/freebsd-vm@v0
       with:
         usesh: true
-        prepare: pkg install -y gmake git
+        prepare: pkg install -y gmake git libX11 libX11-devel
         run: |
           gmake all
           gmake install
