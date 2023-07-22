@@ -4,7 +4,6 @@
 include config.mk
 
 SRC = mhkd.c
-OBJ = $(SRC:.c=.o)
 
 all: options mhkd
 
@@ -14,16 +13,11 @@ options:
 	@echo "LDFLAGS  = $(LDFLAGS)"
 	@echo "CC       = $(CC)"
 
-.c.o:
-	$(CC) -c $(CFLAGS) $<
-
 config.h:
 	cp config.def.h $@
 
-$(OBJ): config.h config.mk
-
-mhkd: mhkd.o
-	$(CC) -o ./$@ mhkd.o $(LDFLAGS)
+mhkd: config.h config.mk
+	$(CC) $(CFLAGS) $(SRC) -o ./$@ $(LDFLAGS)
 
 clean:
 	rm -f ./mhkd $(OBJ) mhkd-$(VERSION).tar.gz
