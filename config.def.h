@@ -41,6 +41,6 @@ struct KeyEvent key_events[] = {
     // { KeyPress, 0, XF86XK_AudioLowerVolume, "bash ~/.local/bin/volume down" },
     // { KeyPress, 0, XF86XK_AudioMute, "bash ~/.local/bin/volume toggle" },
     // { KeyPress, 0, XF86XK_AudioRaiseVolume, "bash ~/.local/bin/volume up" },
-    { 0, 0, 0, NULL },
+    { 0, 0, 0, NULL }
 };
 
