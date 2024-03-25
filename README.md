@@ -22,7 +22,7 @@ $ make
 Run it from your ~/.xinitrc:
 
 ```bash
-while sleep 0.25; do nhkd; done &
+while sleep 0.25; do mhkd; done &
 ```
 
 The loop ensures that you can easily restart the daemon by killing it.
@@ -39,8 +39,6 @@ mhkd &
 ```c
 // config.h
 
-#include <X11/XF86keysym.h>
-
 bool debug_print_spawned_command = false;
 
 struct MouseEvent mouse_events[] = {
@@ -48,11 +46,13 @@ struct MouseEvent mouse_events[] = {
 };
 
 struct KeyEvent key_events[] = {
-    { KeyPress, 0, XF86XK_AudioLowerVolume, "bash ~/.local/bin/volume down" },
-    { KeyPress, 0, XF86XK_AudioMute, "bash ~/.local/bin/volume toggle" },
-    { KeyPress, 0, XF86XK_AudioRaiseVolume, "bash ~/.local/bin/volume up" },
+    { KeyPress, 0, XF86XK_AudioLowerVolume, "sh -c \"bash ~/.local/bin/volume down; bash ~/.local/bin/dwmbar once;\"" },
+    { KeyPress, 0, XF86XK_AudioMute, "sh -c \"bash ~/.local/bin/volume toggle; bash ~/.local/bin/dwmbar once;\"" },
+    { KeyPress, 0, XF86XK_AudioRaiseVolume, "sh -c \"bash ~/.local/bin/volume up; bash ~/.local/bin/dwmbar once;\"" },
 };
 ```
+
+My config is simple, it runs a command on volume up, down & mute.
 
 ---
 # Thanks
