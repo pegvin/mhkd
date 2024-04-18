@@ -39,6 +39,9 @@ mhkd &
 ```c
 // config.h
 
+#include <X11/XF86keysym.h>
+#include <X11/keysym.h>
+
 bool debug_print_spawned_command = false;
 
 struct MouseEvent mouse_events[] = {
@@ -49,10 +52,12 @@ struct KeyEvent key_events[] = {
     { KeyPress, 0, XF86XK_AudioLowerVolume, "sh -c \"bash ~/.local/bin/volume down; bash ~/.local/bin/dwmbar once;\"" },
     { KeyPress, 0, XF86XK_AudioMute, "sh -c \"bash ~/.local/bin/volume toggle; bash ~/.local/bin/dwmbar once;\"" },
     { KeyPress, 0, XF86XK_AudioRaiseVolume, "sh -c \"bash ~/.local/bin/volume up; bash ~/.local/bin/dwmbar once;\"" },
+    { KeyPress, 0, XK_Print, "sh -c \"bash ~/.local/bin/aunty capture;\"" },
+    { 0, 0, 0, NULL }
 };
 ```
 
-My config is simple, it runs a command on volume up, down & mute.
+My config is simple, it runs a command on volume up, down & mute, and calls a custom screenshot script.
 
 ---
 # Thanks
